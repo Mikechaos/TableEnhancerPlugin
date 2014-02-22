@@ -17,7 +17,10 @@
   // Present our default configuration for easy customization
   $.fn.table_enhancer.defaults = {
     width: "45%",
-    headers: ["Last Name", "First name", "Phone Number", "Delete"],
+    headers: ["Last Name", "First name", "Phone Number"],
+    deleteCol: true,
+    collection: [],
+    hideIds: true,
   };
 
   var Table = {
@@ -54,11 +57,30 @@
     },
       
     buildHeaders: function () {
+      this.setHeadersFromCollection();
       headersHtml = "<thead><tr>";
       this.configuration.headers.forEach(function (header) {
         headersHtml += "<th>" + header + "</th>";
       });
         return headersHtml + '</tr></thead>';
+    },
+    
+    setHeadersFromCollection: function () {
+      var headers;
+      if (this.configuration.collection.length > 0) {
+        headers = Object.keys(this.configuration.collection[0])
+        this.configuration.headers = this.formatHeaders(headers);
+      }
+    },
+    
+    formatHeaders: function (headers) {
+      formattedHeaders = [];
+      headers.forEach(function (header) {
+        header = replaceUnderscore(header);
+        header = capitalizeWords(header);
+        formattedHeaders.push(header);
+      });
+      return formattedHeaders;
     },
       
     buildBody: function () {
@@ -78,3 +100,21 @@
 
 })(jQuery);
 
+function replaceUnderscore(header) {
+  return header.replace(/_/g, ' ')
+}
+
+function capitalizeWords(header) {
+  header = header.replaceAt(0, header[0].toUpperCase());
+  return (rec = function (start) {
+    var index;
+    if (start === 0) return header;
+    index = header.indexOf(' ', start) + 1;
+    header = header.replaceAt(index, header[index].toUpperCase());
+    return rec(index);
+  })(1);
+}
+
+String.prototype.replaceAt=function(index, character) {
+    return this.substr(0, index) + character + this.substr(index+character.length);
+}
