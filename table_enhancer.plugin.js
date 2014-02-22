@@ -26,7 +26,7 @@
   var Table = {
     $elem: {},
     configuration: {},
-    
+
     initialize: function ($table, options) {
       if (this.$elem.length > 0) return this;
       console.log('configure');
@@ -36,7 +36,7 @@
       this.buildTable();
       return this;
     },
-      
+
     // Call the action provided, if there is an action provided
     dispatchAction: function (action) {
       if (typeof options === "string") {
@@ -45,17 +45,17 @@
       }
       return action;
     },
-    
+
     // Allow custom configuration to be pass
     configure: function (options) {
       $.extend( this.configuration, $.fn.table_enhancer.defaults, options );
     },
-    
+
     buildTable: function () {
       var html = this.buildHeaders() + this.buildBody();
       this.$elem.html(html);
     },
-      
+
     buildHeaders: function () {
       this.setHeadersFromCollection();
       headersHtml = "<thead><tr>";
@@ -64,19 +64,20 @@
       });
         return headersHtml + '</tr></thead>';
     },
-    
+
     setHeadersFromCollection: function () {
       if (this.configuration.collection.length > 0) {
         this.configuration.headers = this.collectHeaders();
       }
     },
-      
+
     collectHeaders: function () {
       var headers = Object.keys(this.configuration.collection[0])
       headers = this.adjustWithConfiguration(headers);
+      this.configuration.properties = headers;
       return this.formatHeaders(headers);
     },
-    
+
     adjustWithConfiguration: function (headers) {
       if (this.configuration.ignoreIdCol === true) {
         headers = headers.filter(function (header) {
@@ -86,7 +87,7 @@
       if (this.configuration.deleteCol) headers.push('Delete');
       return headers;
     },
-    
+
     formatHeaders: function (headers) {
       formattedHeaders = [];
       headers.forEach(function (header) {
@@ -96,20 +97,35 @@
       });
       return formattedHeaders;
     },
-      
+
     buildBody: function () {
-      bodyHtml = "<tbody>";
-      // this.headers.forEach(function (header) {
-        // headersHtml += "<th>" + header + "</th>";
-      // });
+      var bodyHtml = "<tbody>",
+        self = this;
+      this.configuration.collection.forEach(function (object) {
+        bodyHtml += self.fillRow(object);
+      });
       return bodyHtml + '</tbody>';
     },
-    
+
+    fillRow: function (object) {
+      var html = '<tr>';
+      this.configuration.properties.forEach(function (property) {
+        if (property === "Delete") return true;
+        html += '<td>' + object[property] + '</td>';
+      });
+      if (this.configuration.deleteCol === true) html += this.addDeleteAction(object.id);
+      return html + '</tr>';
+    },
+
+    addDeleteAction: function (id) {
+      return '<td><button class="table_enhancer_delete_action" data-id="' + id + '">X</button>';
+    },
+
     // In charge of destroying the plugin
     destroy: function () {
       this.$elem = {};
     },
-      
+
   };
 
 })(jQuery);
