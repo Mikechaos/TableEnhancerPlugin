@@ -9,7 +9,7 @@
   $.fn.table_enhancer = function(options) {
     // Allow the user to define options to override the defaults
     var configuration = $.extend( {}, $.fn.table_enhancer.defaults, options );
-    this.table = this.table || Table.initialize(options);
+    this.table = Table.initialize(this, options);
     
     return this;
   };
@@ -20,9 +20,13 @@
   };
 
   var Table = {
+    $elem: {},
     configuration: {},
     
-    initialize: function (options) {
+    initialize: function ($table, options) {
+      if (this.$elem.length > 0) return this;
+      console.log('configure');
+      this.$elem = $table;
       options = this.dispatchAction(options); // if options are actually an action
       this.configure(options);
       return this;
@@ -41,7 +45,7 @@
     configure: function (options) {
       $.extend( this.configuration, $.fn.table_enhancer.defaults, options );
     },
-    
+
     // In charge of destroying the plugin
     destroy: function () {
       
