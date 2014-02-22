@@ -18,9 +18,9 @@
   $.fn.table_enhancer.defaults = {
     width: "45%",
     headers: ["Last Name", "First name", "Phone Number"],
-    deleteCol: true,
     collection: [],
-    hideIds: true,
+    deleteCol: true,
+    ignoreIdCol: true,
   };
 
   var Table = {
@@ -66,11 +66,25 @@
     },
     
     setHeadersFromCollection: function () {
-      var headers;
       if (this.configuration.collection.length > 0) {
-        headers = Object.keys(this.configuration.collection[0])
-        this.configuration.headers = this.formatHeaders(headers);
+        this.configuration.headers = this.collectHeaders();
       }
+    },
+      
+    collectHeaders: function () {
+      var headers = Object.keys(this.configuration.collection[0])
+      headers = this.adjustWithConfiguration(headers);
+      return this.formatHeaders(headers);
+    },
+    
+    adjustWithConfiguration: function (headers) {
+      if (this.configuration.ignoreIdCol === true) {
+        headers = headers.filter(function (header) {
+          return header.indexOf('id') === -1;
+        });
+      }
+      if (this.configuration.deleteCol) headers.push('Delete');
+      return headers;
     },
     
     formatHeaders: function (headers) {
