@@ -11,12 +11,13 @@
     var configuration = $.extend( {}, $.fn.table_enhancer.defaults, options );
     this.table = Table.initialize(this, options);
     
-    return this;
+    return this.table;
   };
   
   // Present our default configuration for easy customization
   $.fn.table_enhancer.defaults = {
-    width: "45%"
+    width: "45%",
+    headers: ["Last Name", "First name", "Phone Number", "Delete"],
   };
 
   var Table = {
@@ -29,6 +30,7 @@
       this.$elem = $table;
       options = this.dispatchAction(options); // if options are actually an action
       this.configure(options);
+      this.buildTable();
       return this;
     },
       
@@ -45,16 +47,34 @@
     configure: function (options) {
       $.extend( this.configuration, $.fn.table_enhancer.defaults, options );
     },
-
+    
+    buildTable: function () {
+      var html = this.buildHeaders() + this.buildBody();
+      this.$elem.html(html);
+    },
+      
+    buildHeaders: function () {
+      headersHtml = "<thead><tr>";
+      this.configuration.headers.forEach(function (header) {
+        headersHtml += "<th>" + header + "</th>";
+      });
+        return headersHtml + '</tr></thead>';
+    },
+      
+    buildBody: function () {
+      bodyHtml = "<tbody>";
+      // this.headers.forEach(function (header) {
+        // headersHtml += "<th>" + header + "</th>";
+      // });
+      return bodyHtml + '</tbody>';
+    },
+    
     // In charge of destroying the plugin
     destroy: function () {
-      
+      this.$elem = {};
     },
       
   };
-  
-  function buildHeaders() {
-    
-  }
 
 })(jQuery);
+
