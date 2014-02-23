@@ -18,8 +18,10 @@
   $.fn.table_enhancer.defaults = {
     width: "45%",
     headers: ["Last Name", "First name", "Phone Number"],
+    ignoredHeaders: ['Delete', 'Update'],
     collection: [],
     deleteCol: true,
+    updateInPlace: true,
     ignoreIdCol: true,
   };
 
@@ -85,6 +87,7 @@
           return header.indexOf('id') === -1;
         });
       }
+      if (this.configuration.updateInPlace) headers.push('Update');
       if (this.configuration.deleteCol) headers.push('Delete');
       return headers;
     },
@@ -111,12 +114,16 @@
     fillRow: function (object) {
       var html = '<tr>', self = this;
       this.configuration.properties.forEach(function (property) {
-        if (property === "Delete") return true;
+        if (self.isAIgnoredProperty(property)) return true;
         if (self.isAComplexType(object[property])) html += self.dealWithComplexProperty(object[property]);
         else html += '<td>' + object[property] + '</td>';
       });
+      if (this.configuration.updateInPlace === true) html += this.addUpdateAction(object.id);
       if (this.configuration.deleteCol === true) html += this.addDeleteAction(object.id);
       return html + '</tr>';
+    },
+    isAIgnoredProperty: function (property) {
+      return this.configuration.ignoredHeaders.indexOf(property) !== -1;
     },
 
     dealWithComplexProperty: function (object) {
@@ -164,6 +171,9 @@
       return (object.constructor === Array || object.constructor === Object);
     },
 
+    addUpdateAction: function (id) {
+      return '<td><button class="th-update-action" data-id="' + id + '">Edit</button>';
+    },
     addDeleteAction: function (id) {
       return '<td><button class="th-delete-action" data-id="' + id + '">X</button>';
     },
