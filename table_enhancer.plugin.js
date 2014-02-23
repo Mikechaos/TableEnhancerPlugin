@@ -8,8 +8,10 @@
 (function ($) {
   $.fn.table_enhancer = function(options) {
     // Allow the user to define options to override the defaults
-    var configuration = $.extend( {}, $.fn.table_enhancer.defaults, options );
-    this.table = Table.initialize(this, options);
+    var configuration = $.extend({}, $.fn.table_enhancer.defaults, options),
+      args = Array.prototype.slice.call(arguments, 0);
+    args.unshift(this);
+    this.table = Table.initialize.apply(Table, args);
     
     return this.table;
   };
@@ -33,10 +35,10 @@
     configuration: {},
 
     initialize: function ($table, options) {
+      options = this.dispatchAction.apply(this, Array.prototype.slice.call(arguments, 1)); // if options are actually an action
       if (this.$elem.length > 0) return this;
       console.log('configure');
       this.$elem = $table;
-      options = this.dispatchAction(options); // if options are actually an action
       this.configure(options);
       this.buildTable();
       this.setHandlers();
@@ -45,8 +47,11 @@
 
     // Call the action provided, if there is an action provided
     dispatchAction: function (action) {
-      if (typeof options === "string") {
-        this[action].call(this);
+      var args;
+      if (typeof action === "string") {
+        // To chain the rest of the arguments as parameters for the action
+        args = Array.prototype.slice.call(arguments, 1)
+        this[action].apply(this, args);
         action = {};
       }
       return action;
