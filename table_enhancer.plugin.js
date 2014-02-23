@@ -34,6 +34,7 @@
       options = this.dispatchAction(options); // if options are actually an action
       this.configure(options);
       this.buildTable();
+      this.setHandlers();
       return this;
     },
 
@@ -117,24 +118,51 @@
       if (this.configuration.deleteCol === true) html += this.addDeleteAction(object.id);
       return html + '</tr>';
     },
-      
+
     dealWithComplexProperty: function (object) {
-      var html = '<td class="th-complex">', html2 = "";
+      var html = "", self = this;
+        objectArray = [];
       if (object.constructor === Array) {
+        objectArray = object.slice(1);
         object = object[0];
+        
       }
-      if (object.constructor === Object) {
-        for (key in object) {
-          html2 += ((html2.length > 0) ? ' - ' : '') + object[key];
-        }
+      if (object.constructor === Object) html += this.buildComplexType(object, 0);
+      if (objectArray.length > 0) {
+        objectArray.forEach(function (object, i) {
+          var order = i + 1;
+          html += self.buildComplexType(object, order, true);
+        });
       }
-      return html + html2 + '</td>';
+      return html;
+    },
+
+    buildComplexType: function (object, order, hidden) {
+      var html = "";
+      for (key in object) {
+        html += ((html.length > 0) ? ' - ' : '') + object[key];
+      }
+      return this.complexTdTemplate(order, html, hidden)
+    },
+
+    // - TODO - hide arrow if complex object is alone
+    complexTdTemplate: function (order, html, hidden) {
+      return '' + 
+        '<td class="th-complex" data-order="' + order + '"' +
+        ((hidden === true) ? ' style="display:none;"' : '') + '>' +
+        html +
+        this.addNextElementArrow(order);
+    },
+
+    addNextElementArrow: function (order) {
+      return '&nbsp;&nbsp;<button title="Click to see next element" class="th-next-td-action" data-order="' +
+        order + '" style="cursor:pointer">=&gt;</button></td>';
     },
 
     isAComplexType: function (object) {
       return (object.constructor === Array || object.constructor === Object);
     },
-      
+
     addDeleteAction: function (id) {
       return '<td><button class="th-delete-action" data-id="' + id + '">X</button>';
     },
@@ -144,6 +172,18 @@
       this.$elem = {};
     },
 
+    /*** HANDLERS ***/  
+    setHandlers: function () {
+      $(document).on('click', '.th-next-td-action', this.displayNextComplex);
+    },
+    
+    displayNextComplex: function (e) {
+      var $t = $(e.target).parent(),
+        nextOrder = parseInt($t.attr('data-order') + 1);
+      $t.hide();
+      if ($(".th-complex[data-order=" + nextOrder + "]", $t.parent().parent()).length === 0) nextOrder = 0;
+      $(".th-complex[data-order=" + nextOrder + "]", $t.parent().parent()).show()
+    },
   };
 
 })(jQuery);
