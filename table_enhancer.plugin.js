@@ -208,10 +208,10 @@
 
     displayNextComplex: function (e) {
       var $t = $(e.target).parent(),
-        nextOrder = parseInt($t.attr('data-order') + 1);
+        nextOrder = parseInt($t.attr('data-order')) + 1;
       $t.hide();
-      if ($(".th-complex[data-order=" + nextOrder + "]", $t.parent().parent()).length === 0) nextOrder = 0;
-      $(".th-complex[data-order=" + nextOrder + "]", $t.parent().parent()).show()
+      if ($(".th-complex[data-order=" + nextOrder + "]", $t.parent()).length === 0) nextOrder = 0;
+      $(".th-complex[data-order=" + nextOrder + "]", $t.parent()) .show()
     },
 
     deleteRow: function (e) {
