@@ -108,17 +108,35 @@
     },
 
     fillRow: function (object) {
-      var html = '<tr>';
+      var html = '<tr>', self = this;
       this.configuration.properties.forEach(function (property) {
         if (property === "Delete") return true;
-        html += '<td>' + object[property] + '</td>';
+        if (self.isAComplexType(object[property])) html += self.dealWithComplexProperty(object[property]);
+        else html += '<td>' + object[property] + '</td>';
       });
       if (this.configuration.deleteCol === true) html += this.addDeleteAction(object.id);
       return html + '</tr>';
     },
+      
+    dealWithComplexProperty: function (object) {
+      var html = '<td class="th-complex">', html2 = "";
+      if (object.constructor === Array) {
+        object = object[0];
+      }
+      if (object.constructor === Object) {
+        for (key in object) {
+          html2 += ((html2.length > 0) ? ' - ' : '') + object[key];
+        }
+      }
+      return html + html2 + '</td>';
+    },
 
+    isAComplexType: function (object) {
+      return (object.constructor === Array || object.constructor === Object);
+    },
+      
     addDeleteAction: function (id) {
-      return '<td><button class="table_enhancer_delete_action" data-id="' + id + '">X</button>';
+      return '<td><button class="th-delete-action" data-id="' + id + '">X</button>';
     },
 
     // In charge of destroying the plugin
