@@ -15,11 +15,14 @@
   };
   
   // Present our default configuration for easy customization
+  // - TODO - Ensure passed in configuration is viable
+  // Example, can't have deleteCol true without passing in a deleteCb
   $.fn.table_enhancer.defaults = {
     width: "45%",
     headers: ["Last Name", "First name", "Phone Number"],
     ignoredHeaders: ['Delete', 'Update'],
     collection: [],
+    deleteCb: function () {},
     deleteCol: true,
     updateInPlace: true,
     ignoreIdCol: true,
@@ -147,6 +150,7 @@
     buildComplexType: function (object, order, addArrow, hidden) {
       var html = "";
       for (key in object) {
+        if (key.indexOf('id') !== -1) continue;
         html += ((html.length > 0) ? ' - ' : '') + object[key];
       }
       return this.complexTdTemplate(order, html, addArrow, hidden)
@@ -186,14 +190,21 @@
     /*** HANDLERS ***/  
     setHandlers: function () {
       $(document).on('click', '.th-next-td-action', this.displayNextComplex);
+      $(document).on('click', '.th-delete-action', this.deleteRow.bind(this));
     },
-    
+
     displayNextComplex: function (e) {
       var $t = $(e.target).parent(),
         nextOrder = parseInt($t.attr('data-order') + 1);
       $t.hide();
       if ($(".th-complex[data-order=" + nextOrder + "]", $t.parent().parent()).length === 0) nextOrder = 0;
       $(".th-complex[data-order=" + nextOrder + "]", $t.parent().parent()).show()
+    },
+
+    deleteRow: function (e) {
+      var $e = $(e.target);
+      this.configuration.deleteCb($e.attr('data-id'));
+      $e.parents('tr').detach()
     },
   };
 
