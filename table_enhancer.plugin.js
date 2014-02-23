@@ -121,42 +121,43 @@
 
     dealWithComplexProperty: function (object) {
       var html = "", self = this;
-        objectArray = [];
+        objectArray = [], addArrow = false;
       if (object.constructor === Array) {
         objectArray = object.slice(1);
         object = object[0];
-        
+        addArrow = objectArray.length > 0
       }
-      if (object.constructor === Object) html += this.buildComplexType(object, 0);
+      if (object.constructor === Object) html += this.buildComplexType(object, 0, addArrow);
       if (objectArray.length > 0) {
         objectArray.forEach(function (object, i) {
           var order = i + 1;
-          html += self.buildComplexType(object, order, true);
+          html += self.buildComplexType(object, order, true, true);
         });
       }
       return html;
     },
 
-    buildComplexType: function (object, order, hidden) {
+    buildComplexType: function (object, order, addArrow, hidden) {
       var html = "";
       for (key in object) {
         html += ((html.length > 0) ? ' - ' : '') + object[key];
       }
-      return this.complexTdTemplate(order, html, hidden)
+      return this.complexTdTemplate(order, html, addArrow, hidden)
     },
 
     // - TODO - hide arrow if complex object is alone
-    complexTdTemplate: function (order, html, hidden) {
+    complexTdTemplate: function (order, html, addArrow, hidden) {
       return '' + 
         '<td class="th-complex" data-order="' + order + '"' +
         ((hidden === true) ? ' style="display:none;"' : '') + '>' +
         html +
-        this.addNextElementArrow(order);
+        ((addArrow === true) ? this.addNextElementArrow(order) : '') +
+        '</td>';
     },
 
     addNextElementArrow: function (order) {
       return '&nbsp;&nbsp;<button title="Click to see next element" class="th-next-td-action" data-order="' +
-        order + '" style="cursor:pointer">=&gt;</button></td>';
+        order + '" style="cursor:pointer">=&gt;</button>';
     },
 
     isAComplexType: function (object) {
