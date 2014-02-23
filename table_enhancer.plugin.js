@@ -187,9 +187,17 @@
       return '<td><button class="th-delete-action" data-id="' + id + '">X</button>';
     },
 
+    /*** ACTION ***/
+
     // In charge of destroying the plugin
     destroy: function () {
       this.$elem = {};
+    },
+
+    add: function (row) {
+      var html = this.fillRow(row);
+      this.configuration.collection.push(row);
+      $('tbody', this.$elem).append(html);
     },
 
     /*** HANDLERS ***/  
