@@ -120,7 +120,12 @@
     },
 
     fillRow: function (object) {
-      var html = '<tr>', self = this;
+      var html = '<tr data-id="' + object.id + '">';
+      return html + this.createRowContent(object) + '</tr>';
+    },
+
+    createRowContent: function (object) {
+      var html = "", self = this;
       this.configuration.properties.forEach(function (property) {
         if (self.isAIgnoredProperty(property)) return true;
         if (self.isAComplexType(object[property])) html += self.dealWithComplexProperty(object[property]);
@@ -128,8 +133,9 @@
       });
       if (this.configuration.updateInPlace === true) html += this.addUpdateAction(object.id);
       if (this.configuration.deleteCol === true) html += this.addDeleteAction(object.id);
-      return html + '</tr>';
+      return html;
     },
+
     isAIgnoredProperty: function (property) {
       return this.configuration.ignoredHeaders.indexOf(property) !== -1;
     },
@@ -198,6 +204,11 @@
       var html = this.fillRow(row);
       this.configuration.collection.push(row);
       $('tbody', this.$elem).append(html);
+    },
+
+    update: function (row) {
+      var html = this.createRowContent(row);
+      $('tr[data-id="' + row.id + '"]', this.$elem).html(html);
     },
 
     /*** HANDLERS ***/  
